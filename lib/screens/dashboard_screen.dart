@@ -105,14 +105,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           const SizedBox(height: 6),
                         ],
-                        // ElevatedButton.icon(
-                        //   onPressed: () => Navigator.pushNamed(context, '/pos'),
-                        //   icon: const Icon(Icons.shopping_bag, size: 16),
-                        //   label: const Text('New Order'),
-                        //   style: ElevatedButton.styleFrom(
-                        //     padding: const EdgeInsets.symmetric(
-                        //         horizontal: 16, vertical: 10)),
-                        // ),
+                        ElevatedButton.icon(
+                          onPressed: () => Navigator.pushNamed(context, '/pos'),
+                          icon: const Icon(Icons.shopping_bag, size: 16),
+                          label: const Text('New Order'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10)),
+                        ),
                          ElevatedButton.icon(
                           onPressed: ()async{
                             await loginProvider.logout();
