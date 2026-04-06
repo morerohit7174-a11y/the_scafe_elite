@@ -82,6 +82,7 @@ class CartProvider extends ChangeNotifier {
     grandTotal: grandTotal,
     paymentMode: _paymentMode,
     createdAt: DateTime.now(),
+    
   );
 
   HoldOrder generateHoldOrder() => HoldOrder(
