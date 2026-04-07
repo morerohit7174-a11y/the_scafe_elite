@@ -7,6 +7,7 @@ import '../models/product.dart';
 import '../models/constants.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
+import '../widgets/app_drawer.dart';
 import '../widgets/product_form_dialog.dart';
 
 class ProductsScreen extends StatefulWidget {
@@ -31,14 +32,17 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: CustomScrollView(
-        slivers: [
-          const CafeEliteSliverAppBar(),
-
-          // Title + Add button
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            sliver: SliverToBoxAdapter(
+     endDrawer: const AppDrawer(),
+      body: Column(
+        children: [
+          const AppHeader(),
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                // Title + Add button
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  sliver: SliverToBoxAdapter(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -62,11 +66,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
             sliver: SliverToBoxAdapter(
               child: Column(children: [
                 TextField(
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search, size: 18),
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search, size: 18),
                     hintText: 'Search products...',
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10),
                   ),
                   onChanged: (v) => setState(() => _search = v),
                 ),
@@ -94,10 +98,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             sliver: filtered.isEmpty
-                ? SliverToBoxAdapter(
+                ? const SliverToBoxAdapter(
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.all(40),
+                        padding: EdgeInsets.all(40),
                         child: Text('No products found',
                           style: TextStyle(color: AppTheme.mutedForeground)),
                       ),
@@ -163,10 +167,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       childCount: filtered.length,
                     ),
                   ),
-          ),
-        ],
-      ),
-    );
+          )]
+              ),
+            ),
+          ],
+        ),
+      );
   }
 
   void _showForm(BuildContext context, {Product? product}) {

@@ -1,6 +1,8 @@
 import 'package:cafe_elite/firebase_options.dart';
 import 'package:cafe_elite/providers/login_provider.dart';
 import 'package:cafe_elite/screens/login_screen.dart';
+import 'package:cafe_elite/screens/profile_screen.dart';
+import 'package:cafe_elite/widgets/db_constants.dart';
 import 'package:cafe_elite/widgets/pref_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +22,8 @@ import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SharedPreferenceUtils.init();
+  await SharedPreferenceUtils.init(); 
+  print("Startup userId: ${SharedPreferenceUtils.getString(DatabaseConstants.userId)}");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -62,6 +65,7 @@ class CafeEliteApp extends StatelessWidget {
           '/products':  (_) => const ProductsScreen(),
           '/reports':   (_) => const ReportsScreen(),
           '/printer':   (_) => const PrinterScreen(),
+          '/profile':   (_) => const ProfileScreen(),
         },
       ),
     );

@@ -23,7 +23,7 @@ class FirebaseService {
   static Future<void> saveBill(Bill bill) async {
     try {
       final userId =
-          SharedPreferenceUtils.getString(DatabaseConstants.userId) ?? '';
+          SharedPreferenceUtils.getString(DatabaseConstants.userId);
 
       if (userId.isEmpty) {
         debugPrint("❌ userId missing, cannot save bill");
@@ -58,7 +58,12 @@ class FirebaseService {
       final userId =
           SharedPreferenceUtils.getString(DatabaseConstants.userId);
       print(  "Fetching role for userId: $userId");
-      // if (userId == null) return 'staff';
+      
+      // ✅ Proper empty check
+      if (userId.isEmpty) {
+        debugPrint("⚠️ userId is empty, returning 'staff'");
+        return 'staff';
+      }
 
       final doc = await _users.doc(userId).get();
       final data = doc.data();
@@ -92,7 +97,7 @@ class FirebaseService {
       }
 
       final snap = await query.get();
-
+  
       return snap.docs.map((doc) {
         final m = doc.data();
 
@@ -115,6 +120,13 @@ class FirebaseService {
   static Stream<List<Bill>> billsStream() async* {
   final userId =
       SharedPreferenceUtils.getString(DatabaseConstants.userId);
+
+  // ✅ Null/empty check - return empty stream if not authenticated
+  if (userId.isEmpty) {
+    debugPrint("⚠️ userId is empty, returning empty bills stream");
+    yield [];
+    return;
+  }
 
   final role = await getUserRole();
 

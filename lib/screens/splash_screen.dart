@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/products_provider.dart';
 import '../providers/bills_provider.dart';
+import '../providers/login_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,24 +14,23 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-
-  late AnimationController _masterCtrl;    // master timeline
-  late AnimationController _bubblesCtrl;   // floating bubbles
-  late AnimationController _glowCtrl;      // logo glow pulse
-  late AnimationController _shimmerCtrl;   // text shimmer
-  late AnimationController _waveCtrl;      // ripple waves
-  late AnimationController _rotateCtrl;    // outer ring rotate
-  late AnimationController _floatCtrl;     // logo float
-  late AnimationController _steamCtrl;     // steam wisps
+  late AnimationController _masterCtrl; // master timeline
+  late AnimationController _bubblesCtrl; // floating bubbles
+  late AnimationController _glowCtrl; // logo glow pulse
+  late AnimationController _shimmerCtrl; // text shimmer
+  late AnimationController _waveCtrl; // ripple waves
+  late AnimationController _rotateCtrl; // outer ring rotate
+  late AnimationController _floatCtrl; // logo float
+  late AnimationController _steamCtrl; // steam wisps
 
   late Animation<double> _bgFade;
   late Animation<double> _logoScale;
   late Animation<double> _logoOpacity;
   late Animation<double> _glowPulse;
   late Animation<double> _titleOpacity;
-  late Animation<Offset>  _titleSlide;
+  late Animation<Offset> _titleSlide;
   late Animation<double> _subtitleOpacity;
-  late Animation<Offset>  _subtitleSlide;
+  late Animation<Offset> _subtitleSlide;
   late Animation<double> _loaderOpacity;
   late Animation<double> _shimmer;
   late Animation<double> _float;
@@ -40,94 +39,100 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _steam;
 
   String _loadingText = 'Brewing your experience...';
-  double _progress    = 0.0;
+  double _progress = 0.0;
 
   final math.Random _rng = math.Random(42);
   late final List<_BubbleData> _bubbles;
-  late final List<_SteamData>  _steams;
-  late final List<_StarData>   _stars;
+  late final List<_SteamData> _steams;
+  late final List<_StarData> _stars;
 
   @override
   void initState() {
     super.initState();
     _bubbles = List.generate(22, (_) => _BubbleData(_rng));
-    _steams  = List.generate(6,  (i) => _SteamData(i, _rng));
-    _stars   = List.generate(30, (_) => _StarData(_rng));
+    _steams = List.generate(6, (i) => _SteamData(i, _rng));
+    _stars = List.generate(30, (_) => _StarData(_rng));
     _setupAnimations();
     _startSequence();
   }
 
   void _setupAnimations() {
     // Master fade
-    _masterCtrl = AnimationController(vsync: this,
-        duration: const Duration(milliseconds: 700));
+    _masterCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 700));
     _bgFade = CurvedAnimation(parent: _masterCtrl, curve: Curves.easeIn);
 
     // Bubbles — slow continuous rise
-    _bubblesCtrl = AnimationController(vsync: this,
-        duration: const Duration(seconds: 10))..repeat();
+    _bubblesCtrl =
+        AnimationController(vsync: this, duration: const Duration(seconds: 10))
+          ..repeat();
 
     // Logo bounce in
-    final logoCtrl = AnimationController(vsync: this,
-        duration: const Duration(milliseconds: 1300));
-    _logoScale = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: logoCtrl, curve: Curves.elasticOut));
-    _logoOpacity = Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(parent: logoCtrl,
-            curve: const Interval(0, 0.3, curve: Curves.easeIn)));
+    final logoCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1300));
+    _logoScale = Tween<double>(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: logoCtrl, curve: Curves.elasticOut));
+    _logoOpacity = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
+        parent: logoCtrl, curve: const Interval(0, 0.3, curve: Curves.easeIn)));
     logoCtrl.forward();
 
     // Glow pulse
-    _glowCtrl = AnimationController(vsync: this,
-        duration: const Duration(milliseconds: 2200))..repeat(reverse: true);
-    _glowPulse = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _glowCtrl, curve: Curves.easeInOut));
+    _glowCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 2200))
+      ..repeat(reverse: true);
+    _glowPulse = Tween<double>(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _glowCtrl, curve: Curves.easeInOut));
 
     // Text
-    final textCtrl = AnimationController(vsync: this,
-        duration: const Duration(milliseconds: 900));
-    _titleOpacity = Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(parent: textCtrl, curve: Curves.easeOut));
-    _titleSlide = Tween<Offset>(
-        begin: const Offset(0, 0.6), end: Offset.zero).animate(
-        CurvedAnimation(parent: textCtrl, curve: Curves.easeOutBack));
-    _subtitleOpacity = Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(parent: textCtrl,
-            curve: const Interval(0.4, 1, curve: Curves.easeOut)));
-    _subtitleSlide = Tween<Offset>(
-        begin: const Offset(0, 0.8), end: Offset.zero).animate(
-        CurvedAnimation(parent: textCtrl,
-            curve: const Interval(0.4, 1, curve: Curves.easeOutBack)));
+    final textCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900));
+    _titleOpacity = Tween<double>(begin: 0, end: 1)
+        .animate(CurvedAnimation(parent: textCtrl, curve: Curves.easeOut));
+    _titleSlide = Tween<Offset>(begin: const Offset(0, 0.6), end: Offset.zero)
+        .animate(CurvedAnimation(parent: textCtrl, curve: Curves.easeOutBack));
+    _subtitleOpacity = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
+        parent: textCtrl,
+        curve: const Interval(0.4, 1, curve: Curves.easeOut)));
+    _subtitleSlide =
+        Tween<Offset>(begin: const Offset(0, 0.8), end: Offset.zero).animate(
+            CurvedAnimation(
+                parent: textCtrl,
+                curve: const Interval(0.4, 1, curve: Curves.easeOutBack)));
 
     // Loader
-    final loaderCtrl = AnimationController(vsync: this,
-        duration: const Duration(milliseconds: 600));
+    final loaderCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
     _loaderOpacity = CurvedAnimation(parent: loaderCtrl, curve: Curves.easeIn);
 
     // Shimmer sweep
-    _shimmerCtrl = AnimationController(vsync: this,
-        duration: const Duration(milliseconds: 2200))..repeat();
+    _shimmerCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 2200))
+      ..repeat();
     _shimmer = Tween<double>(begin: -2, end: 3).animate(_shimmerCtrl);
 
     // Logo float up-down
-    _floatCtrl = AnimationController(vsync: this,
-        duration: const Duration(milliseconds: 2800))..repeat(reverse: true);
-    _float = Tween<double>(begin: -8, end: 8).animate(
-        CurvedAnimation(parent: _floatCtrl, curve: Curves.easeInOut));
+    _floatCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 2800))
+      ..repeat(reverse: true);
+    _float = Tween<double>(begin: -8, end: 8)
+        .animate(CurvedAnimation(parent: _floatCtrl, curve: Curves.easeInOut));
 
     // Outer ring slow rotate
-    _rotateCtrl = AnimationController(vsync: this,
-        duration: const Duration(seconds: 25))..repeat();
+    _rotateCtrl =
+        AnimationController(vsync: this, duration: const Duration(seconds: 25))
+          ..repeat();
     _rotate = Tween<double>(begin: 0, end: math.pi * 2).animate(_rotateCtrl);
 
     // Ripple waves
-    _waveCtrl = AnimationController(vsync: this,
-        duration: const Duration(seconds: 4))..repeat();
+    _waveCtrl =
+        AnimationController(vsync: this, duration: const Duration(seconds: 4))
+          ..repeat();
     _wave = Tween<double>(begin: 0, end: math.pi * 2).animate(_waveCtrl);
 
     // Steam
-    _steamCtrl = AnimationController(vsync: this,
-        duration: const Duration(seconds: 3))..repeat();
+    _steamCtrl =
+        AnimationController(vsync: this, duration: const Duration(seconds: 3))
+          ..repeat();
     _steam = Tween<double>(begin: 0, end: 1).animate(_steamCtrl);
 
     // Start delayed animations
@@ -141,26 +146,49 @@ class _SplashScreenState extends State<SplashScreen>
 
     _set('Brewing your experience...', 0.15);
     await Future.delayed(const Duration(milliseconds: 600));
-_set('Loading menu...', 0.38);
-await Future.delayed(const Duration(milliseconds: 600));
+    
+    // ✅ Restore user session from Firebase
+    _set('Checking your session...', 0.25);
+    if (mounted) {
+      final loginProv = context.read<LoginProvider>();
+      await loginProv.restoreSession();
+    }
+    
+    _set('Loading menu...', 0.38);
+    await Future.delayed(const Duration(milliseconds: 600));
 
     _set('Loading sales data...', 0.72);
-    if (mounted) await context.read<BillsProvider>().loadBills();
+    if (mounted) {
+      try {
+        // ✅ Load bills with retry logic
+        await context.read<BillsProvider>().loadBills();
+        debugPrint("✅ Bills loaded successfully");
+      } catch (e) {
+        debugPrint("❌ Failed to load bills: $e");
+        // Continue anyway, user can still use app
+      }
+    }
 
     _set('Almost ready! ☕', 1.0);
     await Future.delayed(const Duration(milliseconds: 900));
 
     if (mounted) {
-      Navigator.pushReplacement(context, PageRouteBuilder(
-        pageBuilder: (_, a, __) => FadeTransition(
-            opacity: a, child: const _NavWrapper()),
-        transitionDuration: const Duration(milliseconds: 800),
-      ));
+      Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (_, a, __) =>
+                FadeTransition(opacity: a, child: const _NavWrapper()),
+            transitionDuration: const Duration(milliseconds: 800),
+          ));
     }
   }
 
   void _set(String t, double v) {
-    if (mounted) setState(() { _loadingText = t; _progress = v; });
+    if (mounted)
+      setState(() {
+        _loadingText = t;
+        _progress = v;
+      });
   }
 
   @override
@@ -185,7 +213,6 @@ await Future.delayed(const Duration(milliseconds: 600));
       body: FadeTransition(
         opacity: _bgFade,
         child: Stack(children: [
-
           // ── 1. Deep gradient background ───────────────────────────
           Container(
             decoration: const BoxDecoration(
@@ -234,7 +261,8 @@ await Future.delayed(const Duration(milliseconds: 600));
                   return Transform.scale(
                     scale: scale,
                     child: Container(
-                      width: 200, height: 200,
+                      width: 200,
+                      height: 200,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
@@ -272,7 +300,8 @@ await Future.delayed(const Duration(milliseconds: 600));
           // ── 6. Steam wisps above logo area ────────────────────────
           Positioned(
             top: sz.height * 0.18,
-            left: 0, right: 0,
+            left: 0,
+            right: 0,
             child: AnimatedBuilder(
               animation: _steamCtrl,
               builder: (_, __) => SizedBox(
@@ -292,12 +321,14 @@ await Future.delayed(const Duration(milliseconds: 600));
                       left: x + wobble - s.size / 2,
                       top: y,
                       child: Container(
-                        width: s.size, height: s.size * 2,
+                        width: s.size,
+                        height: s.size * 2,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(s.size),
                           gradient: RadialGradient(
                             colors: [
-                              const Color(0xFFB8860B).withValues(alpha: opacity),
+                              const Color(0xFFB8860B)
+                                  .withValues(alpha: opacity),
                               Colors.transparent,
                             ],
                           ),
@@ -343,7 +374,6 @@ await Future.delayed(const Duration(milliseconds: 600));
                   child: Transform.scale(
                     scale: _logoScale.value.clamp(0, 1),
                     child: Stack(alignment: Alignment.center, children: [
-
                       // Outer glow halo
                       AnimatedBuilder(
                         animation: _glowCtrl,
@@ -358,7 +388,11 @@ await Future.delayed(const Duration(milliseconds: 600));
                               const Color(0xFFB8860B)
                                   .withValues(alpha: _glowPulse.value * 0.08),
                               Colors.transparent,
-                            ], stops: const [0, 0.5, 1]),
+                            ], stops: const [
+                              0,
+                              0.5,
+                              1
+                            ]),
                           ),
                         ),
                       ),
@@ -401,7 +435,8 @@ await Future.delayed(const Duration(milliseconds: 600));
 
                       // Gold sweep gradient ring
                       Container(
-                        width: 136, height: 136,
+                        width: 136,
+                        height: 136,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: SweepGradient(
@@ -418,7 +453,8 @@ await Future.delayed(const Duration(milliseconds: 600));
 
                       // Inner dark border
                       Container(
-                        width: 127, height: 127,
+                        width: 127,
+                        height: 127,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Color(0xFF100803),
@@ -427,18 +463,18 @@ await Future.delayed(const Duration(milliseconds: 600));
 
                       // Cafe logo image
                       Container(
-                        width: 121, height: 121,
+                        width: 121,
+                        height: 121,
                         decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFFF5F0E6)),
+                            shape: BoxShape.circle, color: Color(0xFFF5F0E6)),
                         child: ClipOval(
                           child: Image.asset(
                             'assets/images/image.png',
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
-                              color: const Color(0xFF2A1507),
-                              child: const Icon(Icons.coffee,
-                                  color: Color(0xFFB8860B), size: 60)),
+                                color: const Color(0xFF2A1507),
+                                child: const Icon(Icons.coffee,
+                                    color: Color(0xFFB8860B), size: 60)),
                           ),
                         ),
                       ),
@@ -448,7 +484,8 @@ await Future.delayed(const Duration(milliseconds: 600));
                         animation: _shimmer,
                         builder: (_, __) => ClipOval(
                           child: Container(
-                            width: 121, height: 121,
+                            width: 121,
+                            height: 121,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment(_shimmer.value - 0.8, -1),
@@ -478,7 +515,6 @@ await Future.delayed(const Duration(milliseconds: 600));
             AnimatedBuilder(
               animation: Listenable.merge([_titleOpacity, _shimmerCtrl]),
               builder: (_, __) => Column(children: [
-
                 // Gold shimmer title
                 FadeTransition(
                   opacity: _titleOpacity,
@@ -500,18 +536,22 @@ await Future.delayed(const Duration(milliseconds: 600));
                           stops: const [0, 0.3, 0.5, 0.7, 1],
                         ).createShader(b),
                         child: const Text('The Cafe Elite',
-                          style: TextStyle(
-                            fontSize: 38,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 2.5,
-                            shadows: [
-                              Shadow(color: Color(0xFFB8860B),
-                                  blurRadius: 24, offset: Offset(0, 3)),
-                              Shadow(color: Color(0xFF000000),
-                                  blurRadius: 8, offset: Offset(0, 1)),
-                            ],
-                          )),
+                            style: TextStyle(
+                              fontSize: 38,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 2.5,
+                              shadows: [
+                                Shadow(
+                                    color: Color(0xFFB8860B),
+                                    blurRadius: 24,
+                                    offset: Offset(0, 3)),
+                                Shadow(
+                                    color: Color(0xFF000000),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 1)),
+                              ],
+                            )),
                       ),
                     ),
                   ),
@@ -525,34 +565,43 @@ await Future.delayed(const Duration(milliseconds: 600));
                   child: SlideTransition(
                     position: _subtitleSlide,
                     child: Column(children: [
-                      Row(mainAxisAlignment: MainAxisAlignment.center,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _gem(), _thinLine(), _thinLine(),
+                          _gem(),
+                          _thinLine(),
+                          _thinLine(),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: AnimatedBuilder(
                               animation: _glowCtrl,
                               builder: (_, __) => Icon(Icons.auto_awesome,
-                                color: Color.lerp(
-                                  const Color(0xFFB8860B),
-                                  const Color(0xFFFFD700),
-                                  _glowPulse.value)!,
-                                size: 16),
+                                  color: Color.lerp(
+                                      const Color(0xFFB8860B),
+                                      const Color(0xFFFFD700),
+                                      _glowPulse.value)!,
+                                  size: 16),
                             ),
                           ),
-                          _thinLine(), _thinLine(), _gem(),
+                          _thinLine(),
+                          _thinLine(),
+                          _gem(),
                         ],
                       ),
                       const SizedBox(height: 12),
                       const Text('TRUST THE TASTE',
-                        style: TextStyle(
-                          fontSize: 12, color: Color(0xFFB8860B),
-                          letterSpacing: 5.5, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFFB8860B),
+                              letterSpacing: 5.5,
+                              fontWeight: FontWeight.w600)),
                       const SizedBox(height: 5),
                       const Text('FINE CAFÉ & BISTRO',
-                        style: TextStyle(
-                          fontSize: 10, color: Color(0xFF6B5030),
-                          letterSpacing: 4, fontWeight: FontWeight.w400)),
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF6B5030),
+                              letterSpacing: 4,
+                              fontWeight: FontWeight.w400)),
                     ]),
                   ),
                 ),
@@ -571,16 +620,17 @@ await Future.delayed(const Duration(milliseconds: 600));
                     duration: const Duration(milliseconds: 500),
                     transitionBuilder: (child, anim) => SlideTransition(
                       position: Tween<Offset>(
-                          begin: const Offset(0, 0.6), end: Offset.zero)
+                              begin: const Offset(0, 0.6), end: Offset.zero)
                           .animate(CurvedAnimation(
                               parent: anim, curve: Curves.easeOut)),
                       child: FadeTransition(opacity: anim, child: child),
                     ),
                     child: Text(_loadingText,
-                      key: ValueKey(_loadingText),
-                      style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF8A6A40),
-                        letterSpacing: 0.8)),
+                        key: ValueKey(_loadingText),
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8A6A40),
+                            letterSpacing: 0.8)),
                   ),
                   const SizedBox(height: 14),
 
@@ -593,16 +643,19 @@ await Future.delayed(const Duration(milliseconds: 600));
                       clipBehavior: Clip.none,
                       children: [
                         // Track
-                        Container(height: 4,
+                        Container(
+                          height: 4,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
-                            color: const Color(0xFFB8860B)
-                                .withValues(alpha: 0.1),
+                            color:
+                                const Color(0xFFB8860B).withValues(alpha: 0.1),
                           ),
                         ),
                         // Glow fill
-                        FractionallySizedBox(widthFactor: v,
-                          child: Container(height: 4,
+                        FractionallySizedBox(
+                          widthFactor: v,
+                          child: Container(
+                            height: 4,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(6),
                               gradient: const LinearGradient(colors: [
@@ -610,10 +663,13 @@ await Future.delayed(const Duration(milliseconds: 600));
                                 Color(0xFFB8860B),
                                 Color(0xFFFFD700),
                               ]),
-                              boxShadow: [BoxShadow(
-                                color: const Color(0xFFFFD700)
-                                    .withValues(alpha: 0.7),
-                                blurRadius: 12, spreadRadius: 1)],
+                              boxShadow: [
+                                BoxShadow(
+                                    color: const Color(0xFFFFD700)
+                                        .withValues(alpha: 0.7),
+                                    blurRadius: 12,
+                                    spreadRadius: 1)
+                              ],
                             ),
                           ),
                         ),
@@ -622,19 +678,25 @@ await Future.delayed(const Duration(milliseconds: 600));
                           AnimatedBuilder(
                             animation: _glowCtrl,
                             builder: (_, __) => Positioned(
-                              left: v * (MediaQuery.of(context).size.width
-                                  - 88) - 6,
+                              left:
+                                  v * (MediaQuery.of(context).size.width - 88) -
+                                      6,
                               top: -4,
                               child: Container(
-                                width: 12, height: 12,
+                                width: 12,
+                                height: 12,
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFFD700),
                                   shape: BoxShape.circle,
-                                  boxShadow: [BoxShadow(
-                                    color: const Color(0xFFFFD700).withValues(
-                                        alpha: 0.5 + _glowPulse.value * 0.5),
-                                    blurRadius: 14,
-                                    spreadRadius: 3)],
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: const Color(0xFFFFD700)
+                                            .withValues(
+                                                alpha: 0.5 +
+                                                    _glowPulse.value * 0.5),
+                                        blurRadius: 14,
+                                        spreadRadius: 3)
+                                  ],
                                 ),
                               ),
                             ),
@@ -649,11 +711,11 @@ await Future.delayed(const Duration(milliseconds: 600));
                     child: TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0, end: _progress),
                       duration: const Duration(milliseconds: 800),
-                      builder: (_, v, __) => Text(
-                        '${(v * 100).toInt()}%',
-                        style: const TextStyle(
-                          fontSize: 10, color: Color(0xFF6B5030),
-                          letterSpacing: 1)),
+                      builder: (_, v, __) => Text('${(v * 100).toInt()}%',
+                          style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF6B5030),
+                              letterSpacing: 1)),
                     ),
                   ),
                 ]),
@@ -665,8 +727,10 @@ await Future.delayed(const Duration(milliseconds: 600));
             FadeTransition(
               opacity: _loaderOpacity,
               child: const Text('v 1.0.0',
-                style: TextStyle(fontSize: 10,
-                    color: Color(0xFF3A2010), letterSpacing: 2)),
+                  style: TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF3A2010),
+                      letterSpacing: 2)),
             ),
             const SizedBox(height: 32),
           ]),
@@ -677,23 +741,27 @@ await Future.delayed(const Duration(milliseconds: 600));
 
   // Helpers
   Widget _gem() => Container(
-    width: 6, height: 6,
-    decoration: BoxDecoration(
-      color: const Color(0xFFD4A017),
-      shape: BoxShape.circle,
-      boxShadow: [BoxShadow(
-        color: const Color(0xFFD4A017).withValues(alpha: 0.5),
-        blurRadius: 6)],
-    ),
-  );
+        width: 6,
+        height: 6,
+        decoration: BoxDecoration(
+          color: const Color(0xFFD4A017),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+                color: const Color(0xFFD4A017).withValues(alpha: 0.5),
+                blurRadius: 6)
+          ],
+        ),
+      );
 
   Widget _thinLine() => Container(
-    width: 36, height: 1,
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Colors.transparent, Color(0xFFB8860B)]),
-    ),
-  );
+        width: 36,
+        height: 1,
+        decoration: const BoxDecoration(
+          gradient:
+              LinearGradient(colors: [Colors.transparent, Color(0xFFB8860B)]),
+        ),
+      );
 }
 
 // ── Data models ───────────────────────────────────────────────────────────────
@@ -747,16 +815,22 @@ class _BubblePainter extends CustomPainter {
           const Color(0xFFD4A017).withValues(alpha: b.opacity * 0.9),
           const Color(0xFFB8860B).withValues(alpha: b.opacity * 0.4),
           Colors.transparent,
-        ], stops: const [0, 0.55, 1]).createShader(
-            Rect.fromCircle(center: Offset(cx, y), radius: b.size));
+        ], stops: const [
+          0,
+          0.55,
+          1
+        ]).createShader(Rect.fromCircle(center: Offset(cx, y), radius: b.size));
 
       canvas.drawCircle(Offset(cx, y), b.size / 2, paint);
 
       // Bubble outline
-      canvas.drawCircle(Offset(cx, y), b.size / 2, Paint()
-        ..color = const Color(0xFFD4A017).withValues(alpha: b.opacity * 1.8)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.6);
+      canvas.drawCircle(
+          Offset(cx, y),
+          b.size / 2,
+          Paint()
+            ..color = const Color(0xFFD4A017).withValues(alpha: b.opacity * 1.8)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 0.6);
 
       // Highlight
       canvas.drawCircle(
@@ -796,9 +870,11 @@ class _DashedRingPainter extends CustomPainter {
   final Color color;
   final double radius, strokeWidth;
   final int dashCount;
-  _DashedRingPainter({
-    required this.color, required this.radius,
-    required this.dashCount, required this.strokeWidth});
+  _DashedRingPainter(
+      {required this.color,
+      required this.radius,
+      required this.dashCount,
+      required this.strokeWidth});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -810,9 +886,8 @@ class _DashedRingPainter extends CustomPainter {
     final dashAngle = math.pi * 2 / dashCount;
     final gapRatio = 0.38;
     for (int i = 0; i < dashCount; i++) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        i * dashAngle, dashAngle * (1 - gapRatio), false, paint);
+      canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
+          i * dashAngle, dashAngle * (1 - gapRatio), false, paint);
     }
   }
 
@@ -827,11 +902,11 @@ class _NavWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = FirebaseAuth.instance;
-if (auth.currentUser != null) {
-  Navigator.pushReplacementNamed(context, '/dashboard');
-} else {
-  Navigator.pushReplacementNamed(context, '/login');
-}
+      if (auth.currentUser != null) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      } else {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     });
     return const Scaffold(backgroundColor: Color(0xFF080503));
   }

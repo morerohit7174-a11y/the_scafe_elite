@@ -24,6 +24,8 @@ class BillsProvider extends ChangeNotifier {
   List<Bill>      _bills      = [];
   List<HoldOrder> _holdOrders = [];
   bool            _isOnline   = false;
+  bool            _isLoading  = false;  // ✅ NEW: Loading state
+  String?         _error      = null;   // ✅ NEW: Error message
 
   StreamSubscription? _billsSub;
   StreamSubscription? _holdsSub;
@@ -31,47 +33,78 @@ class BillsProvider extends ChangeNotifier {
   List<Bill>      get bills      => _bills;
   List<HoldOrder> get holdOrders => _holdOrders;
   bool            get isOnline   => _isOnline;
+  bool            get isLoading  => _isLoading;  // ✅ NEW: Getter for loading
+  String?         get error      => _error;      // ✅ NEW: Getter for error
 
   // ── LOAD FROM FIREBASE ONLY ───────────────────────────
   Future<void> loadBills() async {
-    await _connectFirebase();
+    try {
+      _isLoading = true;  // ✅ Start loading
+      _error = null;
+      notifyListeners();
+      
+      await _connectFirebase();
+      
+      _isLoading = false;  // ✅ Done loading
+      notifyListeners();
+    } catch (e) {
+      debugPrint("❌ loadBills error: $e");
+      _isLoading = false;
+      _error = "Failed to load bills: $e";
+      _isOnline = false;
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> _connectFirebase() async {
-    _isOnline = await FirebaseService.isOnline();
+    try {
+      _isOnline = await FirebaseService.isOnline();
 
-    if (!_isOnline) {
-      debugPrint("❌ Offline mode");
-      notifyListeners();
-      return;
-    }
-
-    debugPrint("✅ Connected to Firebase");
-    notifyListeners();
-
-    // 🔥 Real-time Bills
-    _billsSub?.cancel();
-    _billsSub = FirebaseService.billsStream().listen((bills) {
-      _bills = bills;
-
-      // Optional: cache locally
-      for (final bill in bills) {
-        _db.insertBill(bill);
+      if (!_isOnline) {
+        debugPrint("❌ Offline mode");
+        _error = "You are offline. Using cached data.";
+        notifyListeners();
+        return;
       }
 
+      debugPrint("✅ Connected to Firebase");
+      _error = null;
       notifyListeners();
-    }, onError: (e,stacktrace) {
-      debugPrint("❌ Bills stream error: $e, Stack: $stacktrace");
+
+      // 🔥 Real-time Bills
+      _billsSub?.cancel();
+      _billsSub = FirebaseService.billsStream().listen((bills) {
+        _bills = bills;
+        _isLoading = false;  // ✅ Done loading first batch
+        _error = null;
+
+        // Optional: cache locally
+        for (final bill in bills) {
+          _db.insertBill(bill);
+        }
+
+        debugPrint("✅ Bills loaded: ${bills.length} items");
+        notifyListeners();
+      }, onError: (e,stacktrace) {
+        debugPrint("❌ Bills stream error: $e, Stack: $stacktrace");
+        _isLoading = false;
+        _error = "Stream error: $e";
+        _isOnline = false;
+        notifyListeners();
+      });
+
+      // 🔥 Real-time Hold Orders
+      _holdsSub?.cancel();
+      _holdsSub = FirebaseService.holdOrdersStream().listen((holds) {
+        _holdOrders = holds;
+        notifyListeners();
+      });
+    } catch (e) {
+      debugPrint("❌ _connectFirebase error: $e");
       _isOnline = false;
       notifyListeners();
-    });
-
-    // 🔥 Real-time Hold Orders
-    _holdsSub?.cancel();
-    _holdsSub = FirebaseService.holdOrdersStream().listen((holds) {
-      _holdOrders = holds;
-      notifyListeners();
-    });
+    }
   }
 
   // ── ADD BILL ──────────────────────────────────────────

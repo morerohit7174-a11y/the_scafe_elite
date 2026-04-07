@@ -8,6 +8,8 @@ import '../models/bill.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
 import '../widgets/stats_card.dart';
+import '../widgets/app_drawer.dart';
+import '../services/excel_export_service.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -35,223 +37,251 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: CustomScrollView(
-        slivers: [
-          const CafeEliteSliverAppBar(),
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // Title + date picker
-                Row(children: [
-                  Expanded(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Sales Reports',
-                          style: GoogleFonts.playfairDisplay(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.foreground)),
-                      Text('View your daily sales performance',
-                          style: GoogleFonts.lato(
-                              color: AppTheme.mutedForeground, fontSize: 13)),
-                    ],
-                  )),
-                  OutlinedButton.icon(
-                    onPressed: _pickDate,
-                    icon: const Icon(Icons.calendar_today, size: 15),
-                    label: Text(
-                        isToday
-                            ? 'Today'
-                            : DateFormat('dd MMM yyyy').format(_selectedDate),
-                        style: const TextStyle(fontSize: 13)),
-                  ),
-                ]),
-                const SizedBox(height: 16),
-
-                // Stats grid
-                GridView.count(
-                  crossAxisCount: 3,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 1.05,
-                  children: [
-                    StatsCard(
-                        title: 'Total Sales',
-                        value: '₹${sales.totalSales.toStringAsFixed(2)}',
-                        subtitle: '${sales.totalOrders} orders',
-                        icon: Icons.currency_rupee),
-                    StatsCard(
-                        title: 'Avg Order',
-                        value: '₹${avg.toStringAsFixed(2)}',
-                        icon: Icons.receipt_long),
-                    StatsCard(
-                        title: 'Total Orders',
-                        value: '${sales.totalOrders}',
-                        icon: Icons.shopping_bag),
-                    StatsCard(
-                        title: 'Cash',
-                        value: '₹${sales.cashSales.toStringAsFixed(2)}',
-                        icon: Icons.money),
-                    StatsCard(
-                        title: 'UPI',
-                        value: '₹${sales.upiSales.toStringAsFixed(2)}',
-                        icon: Icons.smartphone),
-                    StatsCard(
-                        title: 'Card',
-                        value: '₹${sales.cardSales.toStringAsFixed(2)}',
-                        icon: Icons.credit_card),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 🔹 HEADER
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+      endDrawer: const AppDrawer(),
+      body: Column(
+        children: [
+          const AppHeader(),
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      // Title + date picker
+                      Row(children: [
+                        Expanded(
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                'Orders — ${isToday ? "Today" : DateFormat("dd MMM yyyy").format(_selectedDate)}',
+                            Text('Sales Reports',
                                 style: GoogleFonts.playfairDisplay(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.foreground)),
+                            Text('View your daily sales performance',
+                                style: GoogleFonts.lato(
+                                    color: AppTheme.mutedForeground,
+                                    fontSize: 13)),
+                          ],
+                        )),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: _pickDate,
+                              icon: const Icon(Icons.calendar_today, size: 15),
+                              label: Text(
+                                  isToday
+                                      ? 'Today'
+                                      : DateFormat('dd MMM yyyy')
+                                          .format(_selectedDate),
+                                  style: const TextStyle(fontSize: 13)),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppTheme.surface,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                '${bills.length} bills',
-                                style: const TextStyle(
-                                  color: AppTheme.mutedForeground,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                            const SizedBox(height: 6),
+                            // ✅ NEW: Download Excel button
+                            ElevatedButton.icon(
+                              onPressed: () => _exportToExcel(prov, sales),
+                              icon: const Icon(Icons.download, size: 15),
+                              label: const Text('Download', style: TextStyle(fontSize: 13)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                foregroundColor: Colors.white,
                               ),
                             ),
                           ],
                         ),
+                      ]),
+                      const SizedBox(height: 5),
+                      // Stats grid
+                      GridView.count(
+                        crossAxisCount: 3,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: 1.05,
+                        children: [
+                          StatsCard(
+                              title: 'Total Sales',
+                              value: '₹${sales.totalSales.toStringAsFixed(2)}',
+                              subtitle: '${sales.totalOrders} orders',
+                              icon: Icons.currency_rupee),
+                          StatsCard(
+                              title: 'Avg Order',
+                              value: '₹${avg.toStringAsFixed(2)}',
+                              icon: Icons.receipt_long),
+                          StatsCard(
+                              title: 'Total Orders',
+                              value: '${sales.totalOrders}',
+                              icon: Icons.shopping_bag),
+                          StatsCard(
+                              title: 'Cash',
+                              value: '₹${sales.cashSales.toStringAsFixed(2)}',
+                              icon: Icons.money),
+                          StatsCard(
+                              title: 'UPI',
+                              value: '₹${sales.upiSales.toStringAsFixed(2)}',
+                              icon: Icons.smartphone),
+                          StatsCard(
+                              title: 'Card',
+                              value: '₹${sales.cardSales.toStringAsFixed(2)}',
+                              icon: Icons.credit_card),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
 
-                        const SizedBox(height: 14),
-                        if (bills.isEmpty)
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 30),
-                              child: Column(
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 🔹 HEADER
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.receipt_long_outlined,
-                                    size: 42,
-                                    color: AppTheme.mutedForeground
-                                        .withValues(alpha: 0.6),
+                                  Expanded(
+                                    child: Text(
+                                      'Orders — ${isToday ? "Today" : DateFormat("dd MMM yyyy").format(_selectedDate)}',
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                  const SizedBox(height: 10),
-                                  const Text(
-                                    'No orders on this date',
-                                    style: TextStyle(
-                                      color: AppTheme.mutedForeground,
-                                      fontSize: 13,
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.surface,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      '${bills.length} bills',
+                                      style: const TextStyle(
+                                        color: AppTheme.mutedForeground,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          )
-                        else ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
-                            margin: const EdgeInsets.only(bottom: 6),
-                            decoration: BoxDecoration(
-                              color: AppTheme.surface,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              children: [
-                                _th('Bill ID', flex: 2),
-                                _th('Time'),
-                                _th('Items', flex: 3),
-                                _th('Pay', flex: 2),
-                                _th('Amount', flex: 2, right: true),
-                              ],
-                            ),
-                          ),
 
-                          // 🔹 LIST
-                          ...bills.asMap().entries.map(
-                                (e) => Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 5,
-                                  ),
-                                  child: _BillRow(
-                                    bill: e.value,
-                                    isEven: e.key.isEven,
-                                    onTap: () => _showDetail(context, e.value),
-                                  ),
-                                ),
-                              ),
-
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: AppTheme.primary.withValues(alpha: 0.25),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    'GRAND TOTAL',
-                                    style: GoogleFonts.lato(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      color: AppTheme.primary,
-                                      letterSpacing: 0.5,
+                              const SizedBox(height: 14),
+                              if (bills.isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 30),
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.receipt_long_outlined,
+                                          size: 42,
+                                          color: AppTheme.mutedForeground
+                                              .withValues(alpha: 0.6),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        const Text(
+                                          'No orders on this date',
+                                          style: TextStyle(
+                                            color: AppTheme.mutedForeground,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                )
+                              else ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 10),
+                                  margin: const EdgeInsets.only(bottom: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.surface,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      _th('Bill ID', flex: 2),
+                                      _th('Time'),
+                                      _th('Items', flex: 3),
+                                      _th('Pay', flex: 2),
+                                      _th('Amount', flex: 2, right: true),
+                                    ],
+                                  ),
                                 ),
-                                Text(
-                                  '₹${grandTotal.toStringAsFixed(2)}',
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: AppTheme.primary,
+
+                                // 🔹 LIST
+                                ...bills.asMap().entries.map(
+                                      (e) => Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 5,
+                                        ),
+                                        child: _BillRow(
+                                          bill: e.value,
+                                          isEven: e.key.isEven,
+                                          onTap: () =>
+                                              _showDetail(context, e.value),
+                                        ),
+                                      ),
+                                    ),
+
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primary
+                                        .withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: AppTheme.primary
+                                          .withValues(alpha: 0.25),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'GRAND TOTAL',
+                                          style: GoogleFonts.lato(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                            color: AppTheme.primary,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        '₹${grandTotal.toStringAsFixed(2)}',
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          color: AppTheme.primary,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
-                            ),
+                            ],
                           ),
-                        ],
-                      ],
-                    ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ]),
                   ),
                 ),
-                const SizedBox(height: 20),
-              ]),
+              ],
             ),
           ),
         ],
@@ -276,6 +306,70 @@ class _ReportsScreenState extends State<ReportsScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null) setState(() => _selectedDate = picked);
+  }
+
+  // ✅ NEW: Export to Excel
+  Future<void> _exportToExcel(BillsProvider prov, sales) async {
+    try {
+      final bills = prov.getBillsByDate(_selectedDate);
+      
+      if (bills.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No bills found for this date')),
+        );
+        return;
+      }
+
+      // Show loading
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          content: Row(
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Exporting to Excel...'),
+            ],
+          ),
+        ),
+      );
+
+      // Export
+      await ExcelExportService.exportDailySalesReport(
+        bills: bills,
+        date: _selectedDate,
+        totalSales: sales.totalSales,
+        totalOrders: sales.totalOrders,
+        cashSales: sales.cashSales,
+        upiSales: sales.upiSales,
+        cardSales: sales.cardSales,
+        totalTax: sales.totalSales - prov.getBillsByDate(_selectedDate).fold(0.0, (sum, b) => sum + b.subtotal),
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading dialog
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('✅ Report exported successfully!'),
+          backgroundColor: AppTheme.primary,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading dialog
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Export failed: $e'),
+          backgroundColor: AppTheme.destructive,
+        ),
+      );
+    }
   }
 
   void _showDetail(BuildContext context, Bill bill) {

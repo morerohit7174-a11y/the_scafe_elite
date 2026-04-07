@@ -1,9 +1,10 @@
-// lib/screens/printer_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
-  import '../services/bluetooth_printer_service.dart';
+import '../services/bluetooth_printer_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_header.dart';
+import '../widgets/app_drawer.dart';
 
 class PrinterScreen extends StatefulWidget {
   const PrinterScreen({super.key});
@@ -13,10 +14,10 @@ class PrinterScreen extends StatefulWidget {
 
 class _PrinterScreenState extends State<PrinterScreen> {
   List<BluetoothInfo> _devices = [];
-  bool _isScanning    = false;
-  bool _isConnecting  = false;
-  bool _isConnected   = false;
-  String _statusMsg   = 'Printer connect karanya sathi Scan kara';
+  bool _isScanning = false;
+  bool _isConnecting = false;
+  bool _isConnected = false;
+  String _statusMsg = 'Printer connect karanya sathi Scan kara';
   String? _connectedName;
 
   @override
@@ -29,9 +30,9 @@ class _PrinterScreenState extends State<PrinterScreen> {
     final conn = await BluetoothPrinterService.checkConnection();
     if (mounted) {
       setState(() {
-        _isConnected  = conn;
+        _isConnected = conn;
         _connectedName = BluetoothPrinterService.connectedPrinter?.name;
-        _statusMsg    = conn
+        _statusMsg = conn
             ? '✅ Connected: $_connectedName'
             : 'Printer connect karanya sathi Scan kara';
       });
@@ -39,25 +40,31 @@ class _PrinterScreenState extends State<PrinterScreen> {
   }
 
   Future<void> _scan() async {
-    setState(() { _isScanning = true; _statusMsg = 'Scanning...'; });
+    setState(() {
+      _isScanning = true;
+      _statusMsg = 'Scanning...';
+    });
     final devices = await BluetoothPrinterService.getPairedDevices();
     setState(() {
-      _devices   = devices;
+      _devices = devices;
       _isScanning = false;
-      _statusMsg  = devices.isEmpty
+      _statusMsg = devices.isEmpty
           ? '❌ Kona printer sahapat nahi. Phone Bluetooth settings madhe pair kara.'
           : '${devices.length} printer sahapat zala';
     });
   }
 
   Future<void> _connect(BluetoothInfo device) async {
-    setState(() { _isConnecting = true; _statusMsg = '${device.name} la connect hoto...'; });
+    setState(() {
+      _isConnecting = true;
+      _statusMsg = '${device.name} la connect hoto...';
+    });
     final ok = await BluetoothPrinterService.connect(device);
     setState(() {
-      _isConnecting  = false;
-      _isConnected   = ok;
+      _isConnecting = false;
+      _isConnected = ok;
       _connectedName = ok ? device.name : null;
-      _statusMsg     = ok
+      _statusMsg = ok
           ? '✅ Connected: ${device.name}'
           : '❌ Connect zala nahi. Printer ON ahe ka check kara.';
     });
@@ -66,9 +73,9 @@ class _PrinterScreenState extends State<PrinterScreen> {
   Future<void> _disconnect() async {
     await BluetoothPrinterService.disconnect();
     setState(() {
-      _isConnected   = false;
+      _isConnected = false;
       _connectedName = null;
-      _statusMsg     = 'Disconnected';
+      _statusMsg = 'Disconnected';
     });
   }
 
@@ -84,41 +91,11 @@ class _PrinterScreenState extends State<PrinterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      endDrawer: const AppDrawer(),
       body: SafeArea(
         child: Column(
           children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: AppTheme.card,
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      } else {
-                        Navigator.pushReplacementNamed(context, "/dashboard");
-                      }
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Printer Settings',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text('Bluetooth Thermal Printer',
-                        style: GoogleFonts.lato(
-                          fontSize: 12, color: AppTheme.mutedForeground)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
+            const AppHeader(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -135,22 +112,25 @@ class _PrinterScreenState extends State<PrinterScreen> {
                             : AppTheme.card,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _isConnected
-                              ? AppTheme.success : AppTheme.border),
+                            color: _isConnected
+                                ? AppTheme.success
+                                : AppTheme.border),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             _isConnected
-                                ? Icons.check_circle : Icons.bluetooth_disabled,
+                                ? Icons.check_circle
+                                : Icons.bluetooth_disabled,
                             color: _isConnected
-                                ? AppTheme.success : AppTheme.mutedForeground,
+                                ? AppTheme.success
+                                : AppTheme.mutedForeground,
                             size: 24,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(_statusMsg,
-                              style: GoogleFonts.lato(fontSize: 13)),
+                                style: GoogleFonts.lato(fontSize: 13)),
                           ),
                         ],
                       ),
@@ -164,11 +144,15 @@ class _PrinterScreenState extends State<PrinterScreen> {
                       child: ElevatedButton.icon(
                         onPressed: _isScanning ? null : _scan,
                         icon: _isScanning
-                            ? const SizedBox(width: 16, height: 16,
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white))
+                                    strokeWidth: 2, color: Colors.white))
                             : const Icon(Icons.bluetooth_searching),
-                        label: Text(_isScanning ? 'Scanning...' : 'Paired Printers Scan Kara'),
+                        label: Text(_isScanning
+                            ? 'Scanning...'
+                            : 'Paired Printers Scan Kara'),
                       ),
                     ),
 
@@ -177,8 +161,8 @@ class _PrinterScreenState extends State<PrinterScreen> {
                     // Device list
                     if (_devices.isNotEmpty) ...[
                       Text('Sahapat Zaleyle Printers',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                          style: GoogleFonts.playfairDisplay(
+                              fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 10),
                       ..._devices.map((device) {
                         final isThisConnected =
@@ -193,29 +177,31 @@ class _PrinterScreenState extends State<PrinterScreen> {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isThisConnected
-                                  ? AppTheme.success : AppTheme.border,
+                                  ? AppTheme.success
+                                  : AppTheme.border,
                               width: isThisConnected ? 1.5 : 1,
                             ),
                           ),
                           child: Row(
                             children: [
                               Icon(Icons.print,
-                                color: isThisConnected
-                                    ? AppTheme.success : AppTheme.mutedForeground,
-                                size: 28),
+                                  color: isThisConnected
+                                      ? AppTheme.success
+                                      : AppTheme.mutedForeground,
+                                  size: 28),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(device.name,
-                                      style: GoogleFonts.lato(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14)),
+                                        style: GoogleFonts.lato(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14)),
                                     Text(device.macAdress,
-                                      style: GoogleFonts.lato(
-                                        fontSize: 11,
-                                        color: AppTheme.mutedForeground)),
+                                        style: GoogleFonts.lato(
+                                            fontSize: 11,
+                                            color: AppTheme.mutedForeground)),
                                   ],
                                 ),
                               ),
@@ -232,11 +218,15 @@ class _PrinterScreenState extends State<PrinterScreen> {
                               else
                                 ElevatedButton(
                                   onPressed: _isConnecting
-                                      ? null : () => _connect(device),
+                                      ? null
+                                      : () => _connect(device),
                                   child: _isConnecting
-                                      ? const SizedBox(width: 16, height: 16,
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
                                           child: CircularProgressIndicator(
-                                            strokeWidth: 2, color: Colors.white))
+                                              strokeWidth: 2,
+                                              color: Colors.white))
                                       : const Text('Connect'),
                                 ),
                             ],
@@ -249,8 +239,8 @@ class _PrinterScreenState extends State<PrinterScreen> {
                     if (_isConnected) ...[
                       const SizedBox(height: 20),
                       Text('Test Print',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                          style: GoogleFonts.playfairDisplay(
+                              fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 10),
                       SizedBox(
                         width: double.infinity,
@@ -287,18 +277,21 @@ class _PrinterScreenState extends State<PrinterScreen> {
                                   color: AppTheme.primary, size: 18),
                               const SizedBox(width: 8),
                               Text('Setup Kasa Karaycha',
-                                style: GoogleFonts.lato(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primary)),
+                                  style: GoogleFonts.lato(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.primary)),
                             ],
                           ),
                           const SizedBox(height: 10),
                           _tip('1. Thermal printer ON kara'),
-                          _tip('2. Phone → Settings → Bluetooth madhe printer pair kara'),
+                          _tip(
+                              '2. Phone → Settings → Bluetooth madhe printer pair kara'),
                           _tip('3. Ithe "Scan" tap kara'),
-                          _tip('4. Tumcha printer select karun "Connect" tap kara'),
+                          _tip(
+                              '4. Tumcha printer select karun "Connect" tap kara'),
                           _tip('5. Test print karun check kara'),
-                          _tip('✅ Aata order complete kelyas automatic print hoel!'),
+                          _tip(
+                              '✅ Aata order complete kelyas automatic print hoel!'),
                         ],
                       ),
                     ),
@@ -313,8 +306,8 @@ class _PrinterScreenState extends State<PrinterScreen> {
   }
 
   Widget _tip(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Text(text,
-      style: GoogleFonts.lato(fontSize: 13, color: AppTheme.foreground)),
-  );
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Text(text,
+            style: GoogleFonts.lato(fontSize: 13, color: AppTheme.foreground)),
+      );
 }

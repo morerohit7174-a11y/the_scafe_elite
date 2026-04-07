@@ -8,18 +8,19 @@ class AppHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final route   = ModalRoute.of(context)?.settings.name ?? '/dashboard';
+    final route = ModalRoute.of(context)?.settings.name ?? '/dashboard';
     final screenW = MediaQuery.of(context).size.width;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: AppTheme.card,
-        border: Border(bottom: BorderSide(color: AppTheme.border)),
+        border: const Border(bottom: BorderSide(color: AppTheme.border)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 6, offset: const Offset(0, 2),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -29,19 +30,14 @@ class AppHeader extends StatelessWidget {
           children: [
             // ── Logo image ───────────────────────────────────────────
             Container(
-              width: 46, height: 46,
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: AppTheme.primary.withValues(alpha: 0.6),
                   width: 1.5,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primary.withValues(alpha: 0.25),
-                    blurRadius: 8, offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: ClipOval(
                 child: Image.asset(
@@ -49,56 +45,56 @@ class AppHeader extends StatelessWidget {
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppTheme.primary,
-                    child: const Icon(Icons.coffee,
-                        color: Colors.white, size: 24),
+                    child:
+                        const Icon(Icons.coffee, color: Colors.white, size: 20),
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
 
             // ── App name ─────────────────────────────────────────────
-            if (screenW > 380)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'The Cafe Elite',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.foreground,
-                    ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'The Cafe Elite',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.foreground,
                   ),
-                  Text(
-                    'Billing Software',
-                    style: GoogleFonts.lato(
-                      fontSize: 10,
-                      color: AppTheme.mutedForeground,
-                    ),
+                ),
+                Text(
+                  'Billing System',
+                  style: GoogleFonts.lato(
+                    fontSize: 12,
+                    color: AppTheme.mutedForeground,
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
             const Spacer(),
 
-            // ── Nav buttons ──────────────────────────────────────────
-            _NavBtn(icon: Icons.dashboard_outlined,
-                label: 'Dashboard', route: '/dashboard',
-                current: route, screenW: screenW),
-            _NavBtn(icon: Icons.shopping_bag_outlined,
-                label: 'New Bill', route: '/pos',
-                current: route, screenW: screenW),
-            _NavBtn(icon: Icons.inventory_2_outlined,
-                label: 'Products', route: '/products',
-                current: route, screenW: screenW),
-            _NavBtn(icon: Icons.bar_chart_outlined,
-                label: 'Reports', route: '/reports',
-                current: route, screenW: screenW),
-            _NavBtn(icon: Icons.print_outlined,
-                label: 'Printer', route: '/printer',
-                current: route, screenW: screenW),
+            // ── Profile Button ───────────────────────────────────────
+            _NavBtn(
+                icon: Icons.person_outline,
+                label: 'Profile',
+                route: '/profile',
+                current: route,
+                screenW: screenW),
+            const SizedBox(width: 4),
+
+            // ── Menu Button ──────────────────────────────────────────
+            Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openEndDrawer(),
+                tooltip: 'Menu',
+              ),
+            ),
           ],
         ),
       ),
@@ -112,7 +108,7 @@ class CafeEliteSliverAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final route   = ModalRoute.of(context)?.settings.name ?? '/dashboard';
+    final route = ModalRoute.of(context)?.settings.name ?? '/dashboard';
     final screenW = MediaQuery.of(context).size.width;
 
     return SliverAppBar(
@@ -130,8 +126,8 @@ class CafeEliteSliverAppBar extends StatelessWidget {
         background: Container(
           decoration: BoxDecoration(
             color: AppTheme.card,
-            border: Border(
-                bottom: BorderSide(color: AppTheme.border, width: 1)),
+            border:
+                Border(bottom: BorderSide(color: AppTheme.border, width: 1)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: SafeArea(
@@ -140,7 +136,8 @@ class CafeEliteSliverAppBar extends StatelessWidget {
               children: [
                 // ── Logo image ────────────────────────────────────
                 Container(
-                  width: 46, height: 46,
+                  width: 46,
+                  height: 46,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
@@ -150,7 +147,8 @@ class CafeEliteSliverAppBar extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                         color: AppTheme.primary.withValues(alpha: 0.25),
-                        blurRadius: 8, offset: const Offset(0, 2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
@@ -175,34 +173,36 @@ class CafeEliteSliverAppBar extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text('The Cafe Elite',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 15, fontWeight: FontWeight.bold,
-                          color: AppTheme.foreground)),
+                          style: GoogleFonts.playfairDisplay(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.foreground)),
                       Text('Billing Software',
-                        style: GoogleFonts.lato(
-                          fontSize: 9, color: AppTheme.mutedForeground,
-                          letterSpacing: 0.5)),
+                          style: GoogleFonts.lato(
+                              fontSize: 9,
+                              color: AppTheme.mutedForeground,
+                              letterSpacing: 0.5)),
                     ],
                   ),
 
                 const Spacer(),
 
                 // ── Nav buttons ───────────────────────────────────
-                _NavBtn(icon: Icons.dashboard_outlined,
-                    label: 'Dashboard', route: '/dashboard',
-                    current: route, screenW: screenW),
-                _NavBtn(icon: Icons.shopping_bag_outlined,
-                    label: 'New Bill', route: '/pos',
-                    current: route, screenW: screenW),
-                _NavBtn(icon: Icons.inventory_2_outlined,
-                    label: 'Products', route: '/products',
-                    current: route, screenW: screenW),
-                _NavBtn(icon: Icons.bar_chart_outlined,
-                    label: 'Reports', route: '/reports',
-                    current: route, screenW: screenW),
-                _NavBtn(icon: Icons.print_outlined,
-                    label: 'Printer', route: '/printer',
-                    current: route, screenW: screenW),
+                // _NavBtn(icon: Icons.dashboard_outlined,
+                //     label: 'Dashboard', route: '/dashboard',
+                //     current: route, screenW: screenW),
+                // _NavBtn(icon: Icons.shopping_bag_outlined,
+                //     label: 'New Bill', route: '/pos',
+                //     current: route, screenW: screenW),
+                // _NavBtn(icon: Icons.inventory_2_outlined,
+                //     label: 'Products', route: '/products',
+                //     current: route, screenW: screenW),
+                // _NavBtn(icon: Icons.bar_chart_outlined,
+                //     label: 'Reports', route: '/reports',
+                //     current: route, screenW: screenW),
+                // _NavBtn(icon: Icons.print_outlined,
+                //     label: 'Printer', route: '/printer',
+                //     current: route, screenW: screenW),
               ],
             ),
           ),
@@ -215,18 +215,20 @@ class CafeEliteSliverAppBar extends StatelessWidget {
 // ── Nav Button ────────────────────────────────────────────────────────────────
 class _NavBtn extends StatelessWidget {
   final IconData icon;
-  final String   label, route, current;
-  final double   screenW;
+  final String label, route, current;
+  final double screenW;
 
   const _NavBtn({
-    required this.icon, required this.label,
-    required this.route, required this.current,
+    required this.icon,
+    required this.label,
+    required this.route,
+    required this.current,
     required this.screenW,
   });
 
   @override
   Widget build(BuildContext context) {
-    final active    = route == current;
+    final active = route == current;
     final iconsOnly = screenW < 600;
 
     return Padding(
@@ -244,27 +246,31 @@ class _NavBtn extends StatelessWidget {
           child: iconsOnly
               ? Padding(
                   padding: const EdgeInsets.all(8),
-                  child: Icon(icon, size: 22,
-                    color: active
-                        ? AppTheme.primary : AppTheme.mutedForeground),
+                  child: Icon(icon,
+                      size: 25,
+                      color:
+                          active ? AppTheme.primary : AppTheme.mutedForeground),
                 )
               : Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 7),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(icon, size: 15,
-                        color: active
-                            ? AppTheme.primary : AppTheme.mutedForeground),
+                      Icon(icon,
+                          size: 15,
+                          color: active
+                              ? AppTheme.primary
+                              : AppTheme.mutedForeground),
                       const SizedBox(width: 5),
                       Text(label,
-                        style: GoogleFonts.lato(
-                          fontSize: 12,
-                          fontWeight: active
-                              ? FontWeight.w700 : FontWeight.w400,
-                          color: active
-                              ? AppTheme.primary : AppTheme.mutedForeground)),
+                          style: GoogleFonts.lato(
+                              fontSize: 12,
+                              fontWeight:
+                                  active ? FontWeight.w700 : FontWeight.w400,
+                              color: active
+                                  ? AppTheme.primary
+                                  : AppTheme.mutedForeground)),
                     ],
                   ),
                 ),
