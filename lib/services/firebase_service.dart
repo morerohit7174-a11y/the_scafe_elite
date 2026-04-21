@@ -9,15 +9,28 @@ import '../data/database_helper.dart';
 class FirebaseService {
   static final _db = FirebaseFirestore.instance;
 
+ static const String env =
+     // UAT -
+      // String.fromEnvironment('ENV', defaultValue: 'uat_cafe_elite');
+
+      // Live -
+
+       String.fromEnvironment('ENV', defaultValue: 'cafe_elite');
+  
+
   // ── Collections ───────────────────────────────────────
   static CollectionReference<Map<String, dynamic>> get _bills =>
-      _db.collection('cafe_elite').doc('data').collection('bills');
+      _db.collection(env).doc('data').collection('bills');
 
   static CollectionReference<Map<String, dynamic>> get _holds =>
-      _db.collection('cafe_elite').doc('data').collection('hold_orders');
+      _db.collection(env).doc('data').collection('hold_orders');
 
-  static CollectionReference<Map<String, dynamic>> get _users =>
-      _db.collection('cafe_elite').doc('data').collection('users');
+   static CollectionReference<Map<String, dynamic>> get _users =>
+      _db.collection(env).doc('data').collection('users');
+
+
+   
+
 
   // ── SAVE BILL ─────────────────────────────────────────
   static Future<void> saveBill(Bill bill) async {

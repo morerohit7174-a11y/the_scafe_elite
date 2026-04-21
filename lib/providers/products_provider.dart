@@ -4,8 +4,18 @@ import '../models/product.dart';
 import '../data/default_products.dart';
 
 class ProductsProvider extends ChangeNotifier {
+
+static const String env =
+     // Live -
+      String.fromEnvironment('ENV', defaultValue: 'cafe_elite');
+
+      // UAT-
+      //  String.fromEnvironment('ENV', defaultValue: 'uat_cafe_elite');
+
+      
+
   static final _col = FirebaseFirestore.instance
-      .collection('cafe_elite')
+      .collection(env)
       .doc('data')
       .collection('products');
 

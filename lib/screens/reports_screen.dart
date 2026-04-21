@@ -325,9 +325,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (ctx) => AlertDialog(
+        builder: (ctx) => const AlertDialog(
           content: Row(
-            children: const [
+            children: [
               CircularProgressIndicator(),
               SizedBox(width: 16),
               Text('Exporting to Excel...'),
@@ -353,8 +353,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('✅ Report exported successfully!'),
+        const SnackBar(
+          content: Text('✅ Report exported successfully!'),
           backgroundColor: AppTheme.primary,
         ),
       );
