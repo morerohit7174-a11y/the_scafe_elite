@@ -11,11 +11,11 @@ class FirebaseService {
 
  static const String env =
      // UAT -
-      // String.fromEnvironment('ENV', defaultValue: 'uat_cafe_elite');
+      String.fromEnvironment('ENV', defaultValue: 'uat_cafe_elite');
 
       // Live -
 
-       String.fromEnvironment('ENV', defaultValue: 'cafe_elite');
+      //  String.fromEnvironment('ENV', defaultValue: 'cafe_elite');
   
 
   // ── Collections ───────────────────────────────────────

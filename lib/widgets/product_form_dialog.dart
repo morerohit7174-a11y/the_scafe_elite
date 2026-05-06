@@ -1,4 +1,3 @@
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../models/constants.dart';
@@ -27,7 +26,10 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     _nameCtrl = TextEditingController(text: widget.product?.name ?? '');
     _nameHindiCtrl = TextEditingController(text: widget.product?.nameHindi ?? '');
     _priceCtrl = TextEditingController(text: widget.product?.price.toString() ?? '');
-    _category = widget.product?.category ?? 'Snacks';
+    // Set category to product's category if it exists in the list (excluding 'All'), otherwise use first available
+    final availableCategories = categories.where((c) => c != 'All').toList();
+    final productCategory = widget.product?.category ?? '';
+    _category = availableCategories.contains(productCategory) ? productCategory : (availableCategories.isNotEmpty ? availableCategories[0] : 'Pizza');
     _isAvailable = widget.product?.isAvailable ?? true;
   }
 

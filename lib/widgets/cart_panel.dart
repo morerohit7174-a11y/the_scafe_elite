@@ -21,7 +21,7 @@ class CartPanel extends StatelessWidget {
 );
     
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppTheme.card,
         border: Border(left: BorderSide(color: AppTheme.border)),
       ),
@@ -30,7 +30,7 @@ class CartPanel extends StatelessWidget {
           // ── Header ────────────────────────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(14, 12, 8, 8),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppTheme.surface,
               border: Border(bottom: BorderSide(color: AppTheme.border)),
             ),

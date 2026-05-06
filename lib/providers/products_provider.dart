@@ -7,10 +7,10 @@ class ProductsProvider extends ChangeNotifier {
 
 static const String env =
      // Live -
-      String.fromEnvironment('ENV', defaultValue: 'cafe_elite');
+      // String.fromEnvironment('ENV', defaultValue: 'cafe_elite');
 
       // UAT-
-      //  String.fromEnvironment('ENV', defaultValue: 'uat_cafe_elite');
+       String.fromEnvironment('ENV', defaultValue: 'uat_cafe_elite');
 
       
 

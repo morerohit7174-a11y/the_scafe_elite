@@ -8,12 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/products_provider.dart';
 import 'providers/bills_provider.dart';
 import 'providers/cart_provider.dart';
 import 'screens/splash_screen.dart';
-import 'screens/dashboard_screen.dart';
+import 'screens/main_navigation_screen.dart';
 import 'screens/pos_screen.dart';
 import 'screens/products_screen.dart';
 import 'screens/reports_screen.dart';
@@ -59,13 +58,13 @@ class CafeEliteApp extends StatelessWidget {
         theme: AppTheme.darkTheme,
         home: const SplashScreen(),
         routes: {
-          '/login':     (_) =>  const LoginScreen(), 
-          '/dashboard': (_) => const DashboardScreen(),
-          '/pos':       (_) => const PosScreen(),
-          '/products':  (_) => const ProductsScreen(),
-          '/reports':   (_) => const ReportsScreen(),
-          '/printer':   (_) => const PrinterScreen(),
-          '/profile':   (_) => const ProfileScreen(),
+          '/login':       (_) => const LoginScreen(), 
+          '/dashboard':   (_) => const MainNavigationScreen(),
+          '/pos':         (_) => const PosScreen(),
+          '/products':    (_) => const ProductsScreen(),
+          '/reports':     (_) => const ReportsScreen(),
+          '/printer':     (_) => const PrinterScreen(),
+          '/profile':     (_) => const ProfileScreen(),
         },
       ),
     );
