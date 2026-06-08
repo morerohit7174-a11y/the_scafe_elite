@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../providers/bills_provider.dart';
 import '../providers/products_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/responsive.dart';
 import '../widgets/app_header.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/stats_card.dart';
@@ -58,7 +59,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               const AppHeader(),
               Expanded(
-                child: CustomScrollView(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: Responsive.isDesktop(context)
+                          ? 1280
+                          : double.infinity,
+                    ),
+                    child: CustomScrollView(
                   slivers: [
                     SliverPadding(
                       padding: const EdgeInsets.all(16),
@@ -152,13 +161,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   color: AppTheme.foreground)),
                           const SizedBox(height: 10),
 
-                          GridView.count(
-                            crossAxisCount: 2,
+                          LayoutBuilder(builder: (context, c) {
+                            final isDesk = Responsive.isDesktop(context);
+                            final cols = isDesk ? 4 : 2;
+                            const spacing = 12.0;
+                            final cardW =
+                                (c.maxWidth - (cols - 1) * spacing) / cols;
+                            // Derive ratio from width so card height stays
+                            // tall enough for its content (no overflow).
+                            final ratio = isDesk
+                                ? (cardW / 120).clamp(1.3, 2.0)
+                                : 1.6;
+                            return GridView.count(
+                            crossAxisCount: cols,
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                            childAspectRatio: 1.6,
+                            mainAxisSpacing: spacing,
+                            crossAxisSpacing: spacing,
+                            childAspectRatio: ratio,
                             children: [
                               StatsCard(
                                   title: "Today's Sales",
@@ -182,7 +202,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       '₹${today.cardSales.toStringAsFixed(2)}',
                                   icon: Icons.credit_card),
                             ],
-                          ),
+                            );
+                          }),
                           const SizedBox(height: 10),
 
                           Row(children: [
@@ -328,6 +349,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                   ],
+                    ),
+                  ),
                 ),
               ),
             ],

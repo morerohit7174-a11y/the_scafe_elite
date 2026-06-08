@@ -6,6 +6,7 @@ import '../providers/cart_provider.dart';
 import '../providers/bills_provider.dart';
 import '../models/constants.dart';
 import '../theme/app_theme.dart';
+import '../utils/responsive.dart';
 import '../widgets/app_header.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/cart_panel.dart';
@@ -148,7 +149,8 @@ class _PosScreenState extends State<PosScreen> {
               ),
             ),
 
-            // Product grid
+            // Product grid — responsive column count so the grid never
+            // appears stretched on wide desktop screens.
             Expanded(
               child: filtered.isEmpty
                   ? const Center(
@@ -162,25 +164,31 @@ class _PosScreenState extends State<PosScreen> {
                               style:
                                   TextStyle(color: AppTheme.mutedForeground)),
                         ]))
-                  : GridView.builder(
-                      padding: const EdgeInsets.all(12),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: 1.1,
-                      ),
-                      itemCount: filtered.length,
-                      itemBuilder: (_, i) {
-                        final p = filtered[i];
-                        final qty = cart.items
-                            .where((x) => x.product.id == p.id)
-                            .fold(0, (s, x) => s + x.quantity);
-                        return _ProductTile(
-                          product: p,
-                          qty: qty,
-                          onTap: () => cart.addItem(p),
+                  : LayoutBuilder(
+                      builder: (context, constraints) {
+                        final cols = Responsive.productGridColumns(
+                            constraints.maxWidth);
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(12),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: cols,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                            childAspectRatio: 1.1,
+                          ),
+                          itemCount: filtered.length,
+                          itemBuilder: (_, i) {
+                            final p = filtered[i];
+                            final qty = cart.items
+                                .where((x) => x.product.id == p.id)
+                                .fold(0, (s, x) => s + x.quantity);
+                            return _ProductTile(
+                              product: p,
+                              qty: qty,
+                              onTap: () => cart.addItem(p),
+                            );
+                          },
                         );
                       },
                     ),
@@ -190,7 +198,7 @@ class _PosScreenState extends State<PosScreen> {
           // ── Cart panel (tablet/desktop) ────────────────────────────────
           if (MediaQuery.of(context).size.width > 600)
             SizedBox(
-              width: 340,
+              width: Responsive.isDesktop(context) ? 400 : 340,
               child: CartPanel(onCheckout: () => _checkout(context)),
             ),
         ])),

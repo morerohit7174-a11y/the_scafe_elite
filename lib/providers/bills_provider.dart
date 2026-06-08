@@ -59,34 +59,28 @@ class BillsProvider extends ChangeNotifier {
 
   Future<void> _connectFirebase() async {
     try {
-      _isOnline = await FirebaseService.isOnline();
-
-      if (!_isOnline) {
-        debugPrint("❌ Offline mode");
-        _error = "You are offline. Using cached data.";
-        notifyListeners();
-        return;
-      }
-
-      debugPrint("✅ Connected to Firebase");
-      _error = null;
-      notifyListeners();
-
-      // 🔥 Real-time Bills
+      // 🔥 Subscribe to the real-time streams IMMEDIATELY so data appears as
+      // fast as Firestore can deliver it (cache-first, then server). We no
+      // longer block on a 3-second connectivity ping before showing data.
       _billsSub?.cancel();
       _billsSub = FirebaseService.billsStream().listen((bills) {
         _bills = bills;
         _isLoading = false;  // ✅ Done loading first batch
         _error = null;
+        _isOnline = true;
 
-        // Optional: cache locally
-        for (final bill in bills) {
-          _db.insertBill(bill);
+        // Cache locally for offline use — MOBILE ONLY. On web each insert
+        // rewrites the whole bills list in IndexedDB, so doing it 200× per
+        // realtime update froze the UI. Firestore already caches on web.
+        if (!kIsWeb) {
+          for (final bill in bills) {
+            _db.insertBill(bill);
+          }
         }
 
         debugPrint("✅ Bills loaded: ${bills.length} items");
         notifyListeners();
-      }, onError: (e,stacktrace) {
+      }, onError: (e, stacktrace) {
         debugPrint("❌ Bills stream error: $e, Stack: $stacktrace");
         _isLoading = false;
         _error = "Stream error: $e";
@@ -98,6 +92,14 @@ class BillsProvider extends ChangeNotifier {
       _holdsSub?.cancel();
       _holdsSub = FirebaseService.holdOrdersStream().listen((holds) {
         _holdOrders = holds;
+        notifyListeners();
+      });
+
+      // Connectivity check runs in the BACKGROUND — it only updates the
+      // online/offline banner and never delays the data above.
+      FirebaseService.isOnline().then((online) {
+        _isOnline = online;
+        _error = online ? null : "You are offline. Using cached data.";
         notifyListeners();
       });
     } catch (e) {

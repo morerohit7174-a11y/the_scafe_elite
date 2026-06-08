@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/login_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/responsive.dart';
 import '../widgets/app_drawer.dart';
 import '../services/firebase_service.dart';
 import '../widgets/pref_utils.dart';
@@ -145,7 +146,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
-              child: Column(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth:
+                        Responsive.isDesktop(context) ? 640 : double.infinity,
+                  ),
+                  child: Column(
                 children: [
                   // Profile Header with Avatar
                   Container(
@@ -453,6 +460,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 24),
                 ],
+                  ),
+                ),
               ),
             ),
           ),

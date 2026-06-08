@@ -167,11 +167,7 @@ class FirebaseService {
       if (m == null) return null;
 
       try {
-        final bill = _mapToBill(m, doc.id);
-
-        print("✅ ${bill.id} | ${bill.userId} | ₹${bill.grandTotal}");
-
-        return bill;
+        return _mapToBill(m, doc.id);
       } catch (e, stack) {
         debugPrint("❌ Error parsing bill ${doc.id}: $e,stack: $stack");
         return null;
